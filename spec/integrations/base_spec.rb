@@ -259,6 +259,23 @@ describe '::Base' do
           it('returns json using the association options') { should eq(result) }
         end
 
+        context 'Given an association Proc :options option' do
+          let(:result) { '{"id":' + obj_id + ',"vehicles":[{"name":"' + obj.first_name + '\'s Super Car"}]}' }
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              field :name do |vehicle, options|
+                "#{options[:owner_name]}'s #{vehicle.make}"
+              end
+            end
+
+            Class.new(Blueprinter::Base) do
+              field :id
+              association :vehicles, blueprint: vehicle_blueprint, options: lambda { |user| { owner_name: user.first_name } }
+            end
+          end
+          it('returns json using the association options') { should eq(result) }
+        end
+
         context 'Given an association :extractor option' do
           let(:result) { '{"id":' + obj_id + ',"vehicles":[{"make":"SUPER CAR"}]}' }
           let(:blueprint) do

@@ -11,8 +11,10 @@ module Blueprinter
 
     def extract(association_name, object, local_options, options = {})
       options_without_default = options.reject { |k, _| %i[default default_if].include?(k) }
+      the_options = options[:options]
+      the_options = the_options.call(object) if the_options.is_a?(Proc)
       # Merge in assocation options hash
-      local_options = local_options.merge(options[:options]) if options[:options].is_a?(Hash)
+      local_options = local_options.merge(the_options) if the_options.is_a?(Hash)
       value = @extractor.extract(association_name, object, local_options, options_without_default)
       return default_value(options) if use_default_value?(value, options[:default_if])
 
